@@ -2,20 +2,22 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
-import { HomeScreen, Wallet } from './pages/Wallet';
+import { Wallet } from './pages/Wallet';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { Create } from './pages/Create';
 import { Animated } from "react-native";
 
 
 const av = new Animated.Value(0);
 av.addListener(() => {return});
+
 const MyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: 'rgb(255, 255, 255)',
-    card: 'rgb(0, 0, 0)',
-    text: '#fff',
+    background: '#fff',
+    card: '#fff',
+    text: '#000',
     border: 'rgb(0, 0, 0)',
     notification: 'rgb(255, 69, 58)',
   },
@@ -48,20 +50,12 @@ function App() {
       <Tab.Screen name="Scan" component={Wallet} />
       {/* <Tab.Screen name="Chats" component={ChatMenu} /> */}
       <Tab.Screen name="Wallet" component={Wallet} />
-      <Tab.Screen name="Create Payment" component={Wallet} />
+      <Tab.Screen name="Create Payment" component={Create} />
     </Tab.Navigator>
     </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 
 
 export default App;
