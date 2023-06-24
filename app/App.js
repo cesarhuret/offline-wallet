@@ -1,12 +1,43 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { HomeScreen, Wallet } from './pages/Wallet';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
-export default function App() {
+const MyTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'rgb(0, 0, 0)',
+    card: 'rgb(0, 0, 0)',
+    text: '#fff',
+    border: 'rgb(0, 0, 0)',
+    notification: 'rgb(255, 69, 58)',
+  },
+};
+
+function App() {
+
+  const Tab = createMaterialTopTabNavigator();
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer
+      theme={MyTheme}
+    >
+      <Tab.Navigator
+        tabBarPosition={"bottom"}
+        // tabBar={(props) => <BottomTabBar {...props} />}
+        // screenOptions={{
+        //   tabBarStyle: { borderWidth: 1, borderRadius: 20, },
+        // }}
+      >
+      <Tab.Screen name="Scan" component={Wallet} />
+      {/* <Tab.Screen name="Chats" component={ChatMenu} /> */}
+      <Tab.Screen name="Wallet" component={Wallet} />
+      <Tab.Screen name="Create Payment" component={Wallet} />
+    </Tab.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -18,3 +49,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+
+export default App;
