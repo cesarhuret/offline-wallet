@@ -5,7 +5,7 @@ import CreateWallet from "../components/CreateWallet";
 
 export const Wallet = ({ navigation }) => {
 
-    const [privateKey1, setPrivateKey] = useState("");
+    const [privateKey, setPrivateKey] = useState("");
     
     useEffect(() => {
         const getPrivateKey = async () => {
@@ -24,7 +24,7 @@ export const Wallet = ({ navigation }) => {
 
     return (
     <View>
-        {privateKey1 === "" ?
+        {privateKey === "" ?
         <View>
             <CreateWallet />
         </View> 
