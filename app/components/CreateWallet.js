@@ -7,15 +7,13 @@ import { touchableOpacityStyles } from './styles';
 import { generatePrivateKey } from 'viem/accounts'
 
 export default function CreateWallet() {
+    const [privateKey, setPrivateKey] = useState("");
 
     const create = () => {
         const privateKey  = generatePrivateKey();
         setPrivateKey(privateKey);
+        setItemAsync('privateKey', privateKey);
     }
-
-    const [privateKey, setPrivateKey] = useState("");
-
-    setItemAsync('privateKey', privateKey);
 
     return (
         <View>
