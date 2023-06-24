@@ -38,30 +38,35 @@ contract Bridge is Pool {
 
     /**
      * @notice Dispatches a message to the destination domain & recipient.
-     * @param _originTokenToSwap Domain of destination chain
-     * @param _destTokenToSwap Domain of destination chain
-     * @param _amountToDeposit Domain of destination chain
+     * @param _originInputToken Domain of destination chain
+     * @param _originOutputToken Domain of destination chain
+     * @param _destOutputToken Domain of destination chain
+     * @param _amountToPayInOutputToken Domain of destination chain
      * @param _destinationChainId Address of recipient on destination chain as bytes32
      * @param _bridgeOnDestinationChain Raw bytes content of message body
      * @param _destinationChainRecipient the address of person we are sending tokens to on the destination chain
      * @return The message ID inserted into the Mailbox's merkle tree
      */
     function swapAndBridge(
-        address _originTokenToSwap,
-        address _destTokenToSwap,
-        address _outputToken,
-        uint256 _amountToDeposit,
+        address _originInputToken,
+        address _originOutputToken,
+        address _destOutputToken,
+        uint256 _amountToPayInOutputToken,
         uint32 _destinationChainId,
         address _bridgeOnDestinationChain,
         address _destinationChainRecipient
     ) external payable returns (bytes32) {
 
-        // deposit amountToDeposit of tokenToSwap in Pool.sol
+        uint256 inputTokenPrice = tokenPrices[_originInputToken];
+
+        uint256 outputTokenPrice = tokenPrices[_originOutputToken];
+
+        uint256 amountOfInputToken = (_amountToPayInOutputToken * outputTokenPrice) / inputTokenPrice;
         
         bytes32 messageId = IMailbox(_mailbox).dispatch(
             _destinationChainId,
             _addressToBytes32(_bridgeOnDestinationChain),
-            bytes(abi.encode(_destTokenToSwap, _outputToken, _amountToDeposit, _destinationChainRecipient))
+            bytes(abi.encode(_destOutputToken, _amountToPayInOutputToken, _destinationChainRecipient))
         );
 
         igp.payForGas{ value: msg.value }(
@@ -71,7 +76,7 @@ contract Bridge is Pool {
             msg.sender // refunds go to msg.sender, who paid the msg.value
         );
 
-        deposit(_originTokenToSwap, _amountToDeposit);
+        deposit(_originInputToken, amountOfInputToken);
 
         return messageId;
 
@@ -83,9 +88,9 @@ contract Bridge is Pool {
         bytes calldata _body
     ) external onlyMailbox {
 
-        (address inputToken, address outputToken, uint256 amount, address recipient) = abi.decode(_body, (address, address, uint256, address));
+        (address outputToken, uint256 amount, address recipient) = abi.decode(_body, (address, uint256, address));
 
-        withdraw(inputToken, outputToken, amount, recipient);
+        withdraw(outputToken, amount, recipient);
     
     }
 

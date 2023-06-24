@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Pool {
 
-    mapping(address => uint256) private tokenPrices;
+    mapping(address => uint256) internal tokenPrices;
 
     constructor(
         address[3] memory tokenAddresses,
@@ -29,29 +29,19 @@ contract Pool {
 
     }
 
-    function deposit(address tokenAddress, uint256 amount) internal {
+    function deposit(address originInputToken, uint256 amountOfInputToken) internal {
 
-        IERC20 token = IERC20(tokenAddress);
+        IERC20 token = IERC20(originInputToken);
 
-        token.transferFrom(msg.sender, address(this), amount);
+        token.transferFrom(msg.sender, address(this), amountOfInputToken);
 
     }    
 
-    function withdraw(address inputToken, address outputToken, uint256 amount, address recipient) internal {
-
-        require(tokenPrices[inputToken] > 0, "Input token price not set");
-
-        require(tokenPrices[outputToken] > 0, "Output token price not set");
-
-        uint256 inputTokenPrice = tokenPrices[inputToken];
-
-        uint256 outputTokenPrice = tokenPrices[outputToken];
-
-        uint256 outputAmount = (amount * inputTokenPrice) / outputTokenPrice;
+    function withdraw(address outputToken, uint256 amountInOutputToken, address recipient) internal {
         
         IERC20 outputTokenContract = IERC20(outputToken);
 
-        outputTokenContract.transfer(recipient, outputAmount);
+        outputTokenContract.transfer(recipient, amountInOutputToken);
 
     }
 
