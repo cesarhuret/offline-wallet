@@ -2,15 +2,15 @@
 
 pragma solidity ^0.8.13;
 
-import "./interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Pool {
 
     mapping(address => uint256) private tokenPrices;
 
     constructor(
-        address[] memory tokenAddresses,
-        uint256[] memory prices
+        address[3] memory tokenAddresses,
+        uint256[3] memory prices
     ) {
 
         require(tokenAddresses.length == prices.length, "tokenAddresses and prices must be the same length");

@@ -13,11 +13,15 @@ contract MyToken is ERC20 {
         string memory symbol,
 
         uint256 initialSupply
-
     ) ERC20(name, symbol) {
 
         _mint(msg.sender, initialSupply * (10 ** uint256(decimals())));
 
+    }
+
+    function mint(address account, uint256 amount) public {
+
+        _mint(account, amount * (10 ** uint256(decimals())));
     }
 
 }

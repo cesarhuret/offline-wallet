@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./Pool.sol";
 import "./interfaces/IMailbox.sol";
+import "./interfaces/IInterchainGasPaymaster.sol";
 
 contract Bridge is Pool {
 
@@ -10,13 +11,17 @@ contract Bridge is Pool {
 
     address immutable _mailbox;
 
+    IInterchainGasPaymaster igp = IInterchainGasPaymaster(
+        0x8f9C3888bFC8a5B25AED115A82eCbb788b196d2a
+    );
+
     // uint32 constant avalancheDomain = 43114;
     // address constant avalancheRecipient = 0x36FdA966CfffF8a9Cdc814f546db0e6378bFef35;
     // address constant ethereumMailbox = 0x2f9DB5616fa3fAd1aB06cB2C906830BA63d135e3;
 
     constructor(
-        address[] memory _tokenAddresses,
-        uint256[] memory _prices,
+        address[3] memory _tokenAddresses,
+        uint256[3] memory _prices,
         address _originMailbox
     ) Pool (
         _tokenAddresses,
@@ -33,7 +38,8 @@ contract Bridge is Pool {
 
     /**
      * @notice Dispatches a message to the destination domain & recipient.
-     * @param _tokenToSwap Domain of destination chain
+     * @param _originTokenToSwap Domain of destination chain
+     * @param _destTokenToSwap Domain of destination chain
      * @param _amountToDeposit Domain of destination chain
      * @param _destinationChainId Address of recipient on destination chain as bytes32
      * @param _bridgeOnDestinationChain Raw bytes content of message body
@@ -41,26 +47,33 @@ contract Bridge is Pool {
      * @return The message ID inserted into the Mailbox's merkle tree
      */
     function swapAndBridge(
-        address _tokenToSwap,
+        address _originTokenToSwap,
+        address _destTokenToSwap,
         address _outputToken,
         uint256 _amountToDeposit,
-        address _originMailbox,
         uint32 _destinationChainId,
         address _bridgeOnDestinationChain,
         address _destinationChainRecipient
-    ) external returns (bytes32) {
+    ) external payable returns (bytes32) {
 
         // deposit amountToDeposit of tokenToSwap in Pool.sol
-
-        bytes32 response = IMailbox(_originMailbox).dispatch(
+        
+        bytes32 messageId = IMailbox(_mailbox).dispatch(
             _destinationChainId,
             _addressToBytes32(_bridgeOnDestinationChain),
-            bytes(abi.encode(_tokenToSwap, _outputToken, _amountToDeposit, _destinationChainRecipient))
+            bytes(abi.encode(_destTokenToSwap, _outputToken, _amountToDeposit, _destinationChainRecipient))
         );
 
-        deposit(_tokenToSwap, _amountToDeposit);
+        igp.payForGas{ value: msg.value }(
+            messageId, // The ID of the message that was just dispatched
+            _destinationChainId, // The destination domain of the message
+            500000, // 100k gas to use in the recipient's handle function
+            msg.sender // refunds go to msg.sender, who paid the msg.value
+        );
 
-        return response;
+        deposit(_originTokenToSwap, _amountToDeposit);
+
+        return messageId;
 
     }
 
