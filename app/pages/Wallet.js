@@ -1,10 +1,29 @@
 import { Text, View } from "react-native";
-import 
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from "react";
+import CreateWallet from "../components/CreateWallet";
 
 export const Wallet = ({ navigation }) => {
+
+    const [privateKey, setPrivateKey] = useState("");
+    
+    useEffect(async () => {
+        privateKey = await SecureStore.getItemAsync('privateKey');
+        setPrivateKey(privateKey);
+    }, []);
+
     return (
         <View>
-            <Text style={{"color": "white"}}>Home Screen</Text>
+        {privateKey != "" ?
+        <View>
+            <CreateWallet />
+        </View> 
+        :
+        <View>
+            
         </View>
+        }
+    </View>
+        
     );
 }
