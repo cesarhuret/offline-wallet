@@ -39,7 +39,10 @@ contract Coinbase {
         IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn);
         updateBalance(tokenIn);
         IMailbox mailbox = IdToMailbox[destinationChain];
-        mailbox.dispatch(destinationChain, addressToBytes32(destinationAddress), abi.encodePacked(tokenOut, amountOut, recipient));
+        
+        // can have price checking stuff here
+
+        mailbox.dispatch(destinationChain, addressToBytes32(destinationAddress), abi.encode(tokenOut, amountOut, recipient));
     }
 
     function handle(
