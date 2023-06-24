@@ -5,14 +5,14 @@
             "value": "mumbai",
             "chainId": 80001,
             "defaultGasPrice": "2000000000",
-            "bridge": "0x3948Ffc658FD2F7739DbE02afCb7AeD8a10Bfb2b"
+            "bridge": "0xa1E9B79405959E03A0de8B92f325CB7DFc6C1959"
         },
         {
             "label": "Goerli",
             "value": "goerli",
             "chainId": 5,
             "defaultGasPrice": "19542",
-            "bridge": "0xe8164B515f72BF5b6b9D1AA41763E90d14381cd5"
+            "bridge": "0xf3679DBeb5954a39a0a2dddb715A4409A4bD81ee"
         },
         {
             "label": "Sepolia",
