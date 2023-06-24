@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { textInputStyles, touchableOpacityStyles } from '../components/styles';
 import DropDownPicker from 'react-native-dropdown-picker';
+import QRCode from 'react-native-qrcode-svg';
 
 export const Create = ({ navigation }) => {
 
@@ -23,15 +24,14 @@ export const Create = ({ navigation }) => {
 
     const [error, setError] = useState(null);
 
-    const walletAddress = "0x0000000";
+    const walletAddress = "0x7d6703218ab83D5255e4532101deB294eA1b9d27";
+
+    const [qrCode, setQrCode] = useState("");
 
     const [openChain, setOpenChain] = useState(false);
     const [openToken, setOpenToken] = useState(false);
 
-    const create = async () => {
-        console.log(token, chain, parseInt(amount || 0));
-    }
-
+    const disabled = amount === null || chain === null || token === null
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -94,11 +94,22 @@ export const Create = ({ navigation }) => {
             />
                     
             <TouchableOpacity
-                style={touchableOpacityStyles}
-                disabled={amount === null || chain === null || token === null}
-                onPress={create}
+                style={disabled ? [touchableOpacityStyles, {borderColor: "#ddd"}] : [touchableOpacityStyles]}
+                disabled={disabled}
+                onPress={() => navigation.push('QRCode', {
+                    tokens: token,
+                    chains: chain,
+                    amount: parseInt(amount || 0),
+                    receiver: walletAddress
+                })}
             >
-                <Text style={{fontSize: 20}}>
+                <Text 
+                    style={ 
+                        disabled ?
+                        {fontSize: 20, color: '#aaa'}
+                        : {fontSize: 20}
+                    }
+                >
                     Create QR Code
                 </Text>
             </TouchableOpacity>
