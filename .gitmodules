@@ -1,17 +1,8 @@
 [submodule "contracts/lib/forge-std"]
 	path = contracts/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "contracts/lib/v3-periphery"]
-	path = contracts/lib/v3-periphery
-	url = https://github.com/Uniswap/v3-periphery
-[submodule "contracts/lib/v3-core"]
-	path = contracts/lib/v3-core
-	url = https://github.com/Uniswap/v3-core
-[submodule "contracts/lib/v2-periphery"]
-	path = contracts/lib/v2-periphery
-	url = https://github.com/uniswap/v2-periphery
-[submodule "contracts/lib/v2-core"]
-	path = contracts/lib/v2-core
-[submodule "contracts/lib/hyperlane-monorepo"]
-	path = contracts/lib/hyperlane-monorepo
-	url = https://github.com/hyperlane-xyz/hyperlane-monorepo
+[submodule "contracts/lib/openzeppelin-contracts"]
+	path = contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "lib\\openzeppelin-contracts"]
+	branch = v4.9.2
