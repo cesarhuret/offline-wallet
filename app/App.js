@@ -4,12 +4,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { HomeScreen, Wallet } from './pages/Wallet';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { Animated } from "react-native";
 
+
+const av = new Animated.Value(0);
+av.addListener(() => {return});
 const MyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: 'rgb(0, 0, 0)',
+    background: 'rgb(255, 255, 255)',
     card: 'rgb(0, 0, 0)',
     text: '#fff',
     border: 'rgb(0, 0, 0)',
@@ -31,6 +35,15 @@ function App() {
         // screenOptions={{
         //   tabBarStyle: { borderWidth: 1, borderRadius: 20, },
         // }}
+        screenListeners={{
+          focus: () => {
+            Animated.timing(av, {
+              toValue: 1,
+              duration: 200,
+              useNativeDriver: true,
+            }).start();
+          },
+        }}
       >
       <Tab.Screen name="Scan" component={Wallet} />
       {/* <Tab.Screen name="Chats" component={ChatMenu} /> */}
