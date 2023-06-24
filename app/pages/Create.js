@@ -26,10 +26,6 @@ export const Create = ({ navigation }) => {
 
     const disabled = amount === null || chain === null || token === null
 
-    useEffect(() => {
-        console.log(amount)
-    }, [amount])
-
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', padding: 50}}>
             <Text style={{fontSize: 25}}>Create a Payment</Text>
@@ -42,7 +38,6 @@ export const Create = ({ navigation }) => {
                 <DropDownPicker
                     mode="BADGE"
                     open={openChain}
-                    multiple={true}
                     value={chain}
                     items={chains}
                     setOpen={setOpenChain}
@@ -102,7 +97,7 @@ export const Create = ({ navigation }) => {
                     disabled={disabled}
                     onPress={() => navigation.push('QRCode', {
                         token: token,
-                        chains: chain,
+                        chain: chain,
                         amount: parseFloat(amount.replace(",", ".") || 0),
                         receiver: address,
                         share: true

@@ -1,0 +1,97 @@
+{
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address[3]",
+            "name": "_tokenAddresses",
+            "type": "address[3]"
+          },
+          {
+            "internalType": "uint256[3]",
+            "name": "_prices",
+            "type": "uint256[3]"
+          },
+          {
+            "internalType": "address",
+            "name": "_originMailbox",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint32",
+            "name": "_origin",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "_sender",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "_body",
+            "type": "bytes"
+          }
+        ],
+        "name": "handle",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_originInputToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_originOutputToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_destOutputToken",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_amountToPayInOutputToken",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "_destinationChainId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "address",
+            "name": "_bridgeOnDestinationChain",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_destinationChainRecipient",
+            "type": "address"
+          }
+        ],
+        "name": "swapAndBridge",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function"
+      }
+    ]
+  }

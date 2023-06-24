@@ -6,7 +6,7 @@ import { touchableOpacityStyles } from "./styles";
 import { TouchableOpacity } from "react-native";
 import { chains } from "../data/chains.json";
 import { tokens } from "../data/tokens.json";
-import { abi } from "../data/IERC20.json"
+import Bridge from "../data/Bridge.json";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import "react-native-get-random-values"
 import "@ethersproject/shims"
@@ -28,19 +28,38 @@ export const Sign = ({route, navigation}) => {
 
         const privateKey = await getItemAsync('privateKey');
 
-        const chainData = chains.filter(c => c.value === chain)[0];
-        const tokenData = tokens.filter(t => t.value === token)[0];
-        const tokenAddress = tokenData.addresses[chainData.chainId];
+        const merchantData = route.params;
 
-        const inf = new utils.Interface(abi);
+        const fromChain = chains.filter(c => c.value === chain)[0];
+        const fromToken = tokens.filter(t => t.value === token)[0];
 
-        const data = inf.encodeFunctionData(
-            "transfer", 
-            [
-                receiver,
-                BigNumber.from((route.params.amount * 10**tokenData.decimals).toString())
-            ]
+        console.log(merchantData, chains)
+        
+        const toChain = chains.filter(c => c.value === merchantData.chain)[0];
+        const toToken = (tokens.filter(t => t.value === merchantData.token)[0]);
+        
+        console.log(fromChain, fromToken, toChain, toToken)
+
+        const bridgeInterface = new utils.Interface(Bridge.abi);
+
+        const params = [
+            fromToken.addresses[fromChain.chainId], //_originInputToken
+            toToken.addresses[fromChain.chainId], //_originOutputToken  
+            toToken.addresses[toChain.chainId], //_destOutputToken 
+            BigNumber.from((merchantData.amount * 10**toToken.decimals).toString()), //_amountToPayInOutputToken 
+            toChain.chainId, //_destinationChainId
+            toChain.bridge, //_bridgeOnDestinationChain 
+            receiver, //_destinationChainRecipient 
+        ]
+
+        console.log(params)
+
+        const data = bridgeInterface.encodeFunctionData(
+            "swapAndBridge", 
+            params
         )
+
+        console.log(data)
 
         const wallet = new ethers.Wallet(privateKey);
         const transactionCount = await AsyncStorage.getItem('transactionCount');
@@ -48,20 +67,22 @@ export const Sign = ({route, navigation}) => {
         const tx = {
             nonce: parseInt(transactionCount),
             type: 2,
-            maxPriorityFeePerGas: utils.parseUnits("5", "gwei"),
-            maxFeePerGas: utils.parseUnits("20", "gwei"),
-            gasLimit: BigNumber.from('40000'),
-            to: tokenAddress,
-            value: utils.parseEther('0'),
+            maxPriorityFeePerGas: utils.parseUnits("3", "gwei"),
+            maxFeePerGas: utils.parseUnits("4", "gwei"),
+            gasLimit: BigNumber.from('150000'),
+            to: fromChain.bridge,
+            value: utils.parseEther('0.08'),
             data: data,
-            chainId: chainData.chainId
+            chainId: fromChain.chainId
         }
         
         const signature = await wallet.signTransaction(tx);
 
-        await AsyncStorage.setItem('transactionCount', (parseInt(transactionCount) + 1).toString());
+        console.log(signature)
 
-        navigation.replace('QRCode', signature)
+        // await AsyncStorage.setItem('transactionCount', (parseInt(transactionCount) + 1).toString());
+
+        // navigation.replace('QRCode', signature)
     }
 
     return (
@@ -117,6 +138,7 @@ export const Sign = ({route, navigation}) => {
 
             <View style={{justifyContent: 'flex-end'}}>
                 <TouchableOpacity
+                    disabled={!token || !chain}
                     style={[touchableOpacityStyles, {backgroundColor: "#000"}]}
                     onPress={sign}
                 >

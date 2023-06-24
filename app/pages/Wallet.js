@@ -6,8 +6,12 @@ import { useEffect, useState } from "react";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { touchableOpacityStyles } from '../components/styles';
 import { goerli } from 'viem/chains';
+import IERC20 from "../data/IERC20.json";
 import { createPublicClient, createWalletClient, parseGwei, http, parseEther } from 'viem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import "react-native-get-random-values"
+import "@ethersproject/shims"
+import { BigNumber, utils } from 'ethers';
 
 
 export const Wallet = ({ navigation }) => {
@@ -19,6 +23,13 @@ export const Wallet = ({ navigation }) => {
     useEffect(() => {
         getItemAsync('address')
         .then((address) => address && setUp(address))
+
+        const inf = new utils.Interface(IERC20.abi);
+        
+        console.log(inf.encodeFunctionData('approve', [
+            "0xf3679DBeb5954a39a0a2dddb715A4409A4bD81ee",
+            BigNumber.from("10000000000000000")
+        ]))
     }, [])
 
     const setUp = async (address) => {
@@ -42,7 +53,6 @@ export const Wallet = ({ navigation }) => {
     }
 
     const create = async () => {
-
 
         const privateKey = generatePrivateKey();
 
