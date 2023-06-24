@@ -3,7 +3,7 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useEffect, useState } from "react";
 import { touchableOpacityStyles } from '../components/styles';
 
-export const Scan = ({ navigation }) => {
+export const ScanPopup = ({ navigation }) => {
 
     const styles = StyleSheet.create({
         container: {
@@ -31,8 +31,8 @@ export const Scan = ({ navigation }) => {
 
     const handleBarCodeScanned = ({type, data}) => {
         setScanned(true);
-        parsedData = JSON.parse(data)
-        navigation.push('Sign', parsedData);
+        const signature = data;
+        navigation.push('Execute', JSON.stringify({ signature }));
     }
 
     useEffect(() => {

@@ -12,15 +12,15 @@ export const touchableOpacityStyles = {
 
 export const textInputStyles = {
     backgroundColor: '#fff',
-    borderWidth: 0,
-    borderBottomWidth: 1,
+    borderWidth: 1,
+    borderRadius: 9,
     borderColor: '#303030',
     color: '#000',
     width: 300,
     height: 55,
     padding: 10,
     marginBottom: 19,
-    fontSize: 20
+    fontSize: 16
 }
 
 export const searchStyles = {

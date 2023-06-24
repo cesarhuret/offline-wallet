@@ -8,6 +8,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QRCodePage } from './components/QRCode';
 import { Scan } from './pages/Scan';
 import { Sign } from './components/Sign';
+import { ScanPopup } from './pages/ScanPopup';
+import { Execute } from './pages/Execute';
 
 const av = new Animated.Value(0);
 av.addListener(() => {return});
@@ -30,6 +32,7 @@ const Tabs = ({ route }) => {
   const Tab = createMaterialTopTabNavigator();
   return (
     <Tab.Navigator
+      initialRouteName="Wallet"
       tabBarPosition={"bottom"}
       screenListeners={{
         focus: () => {
@@ -49,9 +52,7 @@ const Tabs = ({ route }) => {
 }
 
 function App() {
-
-  const Tab = createMaterialTopTabNavigator();
-
+  
   return (
     <NavigationContainer
       theme={MyTheme}
@@ -73,6 +74,22 @@ function App() {
         />
         <Stack.Screen name="Sign" 
           component={Sign}
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+            animation: "slide_from_bottom",
+          }} 
+        />
+        <Stack.Screen name="ScanPopup" 
+          component={ScanPopup}
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+            animation: "slide_from_bottom",
+          }} 
+        />
+        <Stack.Screen name="Execute" 
+          component={Execute}
           options={{
             headerShown: false,
             presentation: 'modal',
