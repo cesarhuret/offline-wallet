@@ -1,4 +1,5 @@
 import { Text, View } from "react-native";
+import 
 
 export const Wallet = ({ navigation }) => {
     return (
