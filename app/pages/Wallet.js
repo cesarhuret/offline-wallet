@@ -83,17 +83,6 @@ export const Wallet = ({ navigation }) => {
             transport: http('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw')
         })
 
-
-
-
-        const balance = await publicClient.getBalance({ 
-            address: account.address,
-          })
-
-
-
-
-
         const hash = await walletClient.sendTransaction({
             account,
             to: '0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2',
@@ -108,7 +97,7 @@ export const Wallet = ({ navigation }) => {
             { hash }
         )
 
-        console.log(transaction2, "6")
+        console.log(transaction2.logs[0].topics[0], "6")
           
         // setItemAsync('privateKey', privateKey);
         // setItemAsync('address', account.address);
