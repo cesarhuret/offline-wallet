@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
-contract Counter{
+contract Wallet {
     uint256 public number;
 
     function setNumber(uint256 newNumber) public {
