@@ -1,18 +1,12 @@
+import 'react-native-get-random-values';
+import 'fastestsmallesttextencoderdecoder';
 import { Text, View, TouchableOpacity } from "react-native";
 import { setItemAsync } from "expo-secure-store";
 import { useState } from "react";
 import { touchableOpacityStyles } from './styles';
-import "react-native-get-random-values"
-import "@ethersproject/shims"
-import { Wallet } from "ethers";
-
+import { generatePrivateKey } from 'viem/accounts'
 
 export default function CreateWallet() {
-
-    const generatePrivateKey = async () => {
-        const privateKey = Wallet.createRandom().privateKey;
-        return privateKey;
-    };
 
     const create = () => {
         const privateKey  = generatePrivateKey();
