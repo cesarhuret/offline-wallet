@@ -18,10 +18,10 @@ const MyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: '#fff',
-    card: '#fff',
-    text: '#000',
-    border: 'rgb(0, 0, 0)',
+    background: '#0xf0f0f0',
+    card: '#0xf0f0f0',
+    text: '#0x121212',
+    border: 'rgb(18, 18, 18)',
     notification: 'rgb(255, 69, 58)',
   },
 };
