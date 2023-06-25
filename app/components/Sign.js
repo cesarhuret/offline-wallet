@@ -64,13 +64,13 @@ export const Sign = ({route, navigation}) => {
         const data = bridgeInterface.encodeFunctionData(
             "swapAndBridge", 
             params
-        )
-        const provider = new providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw');
-        
+        )        
 
-        const wallet = new ethers.Wallet(privateKey, provider);
+        const wallet = new ethers.Wallet(privateKey);
         
         const signatures = pad(wallet.address, { size: 32 }) + pad("1", { size: 32 }).replace("0x", "00")
+
+        console.log(wallet.address)
 
         const aaData = encodeFunctionData({
             abi: [executeABI],
@@ -93,20 +93,17 @@ export const Sign = ({route, navigation}) => {
 
         console.log(BigNumber.from((transactionCount).toString()), transactionCount)
 
-        const signature = await wallet.signTransaction(await wallet.populateTransaction({
+        const signature = await wallet.signTransaction({
             nonce: (parseInt(transactionCount) + 1),
             type: 2,
             to: aaAddress,
             data: aaData,
-            maxFeePerGas: parseGwei('10'),
-            maxPriorityFeePerGas: parseGwei('9'),
-            gasLimit: '200000',
-            // gasPrice: parseGwei('3'),
-            chainId: fromChain.chainId
-        }));
-
-
-        provider.sendTransaction(signature).then(console.log);
+            maxFeePerGas: parseGwei("24"),
+            maxPriorityFeePerGas: parseGwei("2"),
+            value: parseEther("0"),
+            gasLimit: 200000n,
+            chainId: fromChain.chainId,
+        });
 
         await AsyncStorage.setItem('transactionCount', (parseInt(transactionCount) + 1).toString());
 

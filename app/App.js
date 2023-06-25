@@ -60,7 +60,7 @@ function App() {
       <StatusBar style="dark" />
       <Stack.Navigator
         screenOptions={{
-          headerBackTitleVisible: true
+          headerBackTitleVisible: true,
         }}
       >
         <Stack.Screen name="Main" component={Tabs}/>

@@ -1,6 +1,6 @@
 import 'react-native-get-random-values';
 import 'fastestsmallesttextencoderdecoder';
-import { Text, View, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Text, View, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
 import { setItemAsync, getItemAsync, deleteItemAsync } from "expo-secure-store";
 import { useEffect, useState } from "react";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
@@ -182,8 +182,20 @@ export const Wallet = ({ navigation }) => {
                 <View>
                     {
                         address ? 
-                        <View style={{ flex: 1, justifyContent: 'center'}}>
-                            <Text style={{fontSize: 25 }}>Your Account: {address?.substring(0, 6)}...{address?.substring(address?.length - 4, address?.length)}</Text>
+                        <View style={{ flex: 1, justifyContent: 'center', width: "120%", alignItems: "center"}}>
+                            <Text style={{fontSize: 25 }}>Your Safe: {address?.substring(0, 6)}...{address?.substring(address?.length - 4, address?.length)}
+                        </Text>
+                        
+                            <TouchableOpacity
+                                style={[touchableOpacityStyles, {backgroundColor: "#000"}, {width: "80%"}, {marginTop: 50}]}
+                                onPress={() => Linking.openURL(`https://goerli.etherscan.io/address/${address}`)}
+                            >
+                                <Text
+                                    style={{fontSize: 20, color: "#fff"}}
+                                >
+                                    View on Etherscan
+                                </Text>
+                            </TouchableOpacity>
                         </View> 
                         :
                         <View>

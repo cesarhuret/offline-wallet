@@ -4,6 +4,7 @@ import { touchableOpacityStyles } from "../components/styles";
 import { TouchableOpacity } from "react-native";
 import { Wallet, providers } from "ethers";
 import { getItemAsync } from "expo-secure-store";
+import { parseTransaction, serializeTransaction, toHex } from "viem";
 
 export const Execute = ({route, navigation}) => {
 
@@ -11,17 +12,13 @@ export const Execute = ({route, navigation}) => {
 
     const execute = async () => {
 
-        const provider = new providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw');
+        const provider = new providers.JsonRpcProvider('https://rpc.ankr.com/eth_goerli');
 
-        const privateKey = await getItemAsync('privateKey');
-
-        const wallet = new Wallet(privateKey, provider);
-
-        const sentTx = await wallet.sendTransaction(JSON.parse(route.params).signature.replace(/"/g, ''));
+        const sentTx = await provider.sendTransaction(JSON.parse(route.params).signature.replace(/"/g, ''));
 
         console.log(sentTx)
 
-        const response = await sentTx.wait();
+        const response = await provider.waitForTransaction(sentTx.hash);
 
         setHash(response.transactionHash);
     }

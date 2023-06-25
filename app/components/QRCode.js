@@ -12,7 +12,7 @@ export const QRCodePage = ({route, navigation}) => {
             <Text style={{fontSize: 30}}>Payment QR Code</Text>
             <View style={{flex: 1, justifyContent: 'center'}}>
                 <QRCode
-                    size={200}
+                    size={300}
                     value={JSON.stringify(route.params)}
                 />
             </View>
