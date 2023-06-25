@@ -10,7 +10,11 @@ import Bridge from "../data/Bridge.json";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import "react-native-get-random-values"
 import "@ethersproject/shims"
-import { BigNumber, ethers, utils } from "ethers";
+import { BigNumber, ethers, providers, utils } from "ethers";
+import { executeABI } from "./execute";
+import { createPublicClient, createWalletClient, encodeFunctionData, http, pad, parseEther, parseGwei } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { goerli } from "viem/chains";
 
 export const Sign = ({route, navigation}) => {
 
@@ -27,6 +31,9 @@ export const Sign = ({route, navigation}) => {
     const sign = async () => {
 
         const privateKey = await getItemAsync('privateKey');
+        const aaAddress = await getItemAsync('address');
+
+        const transactionCount = await AsyncStorage.getItem('transactionCount');
 
         const merchantData = route.params;
 
@@ -58,31 +65,52 @@ export const Sign = ({route, navigation}) => {
             "swapAndBridge", 
             params
         )
-
-        console.log(data)
-
-        const wallet = new ethers.Wallet(privateKey);
-        const transactionCount = await AsyncStorage.getItem('transactionCount');
+        const provider = new providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw');
         
-        const tx = {
-            nonce: parseInt(transactionCount),
+
+        const wallet = new ethers.Wallet(privateKey, provider);
+        
+        const signatures = pad(wallet.address, { size: 32 }) + pad("1", { size: 32 }).replace("0x", "00")
+
+        const aaData = encodeFunctionData({
+            abi: [executeABI],
+            args: [
+                fromChain.bridge,
+                parseEther('0.01'),
+                data,
+                0,
+                parseGwei("0"),
+                parseGwei("0"),
+                parseGwei("0"),
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+                signatures
+            ]
+        })
+        
+        // console.log(wallet)
+
+
+        console.log(BigNumber.from((transactionCount).toString()), transactionCount)
+
+        const signature = await wallet.signTransaction(await wallet.populateTransaction({
+            nonce: (parseInt(transactionCount) + 1),
             type: 2,
-            maxPriorityFeePerGas: utils.parseUnits("3", "gwei"),
-            maxFeePerGas: utils.parseUnits("4", "gwei"),
-            gasLimit: BigNumber.from('150000'),
-            to: fromChain.bridge,
-            value: utils.parseEther('0.08'),
-            data: data,
+            to: aaAddress,
+            data: aaData,
+            maxFeePerGas: parseGwei('10'),
+            maxPriorityFeePerGas: parseGwei('9'),
+            gasLimit: '200000',
+            // gasPrice: parseGwei('3'),
             chainId: fromChain.chainId
-        }
-        
-        const signature = await wallet.signTransaction(tx);
+        }));
 
-        console.log(signature)
 
-        // await AsyncStorage.setItem('transactionCount', (parseInt(transactionCount) + 1).toString());
+        provider.sendTransaction(signature).then(console.log);
 
-        // navigation.replace('QRCode', signature)
+        await AsyncStorage.setItem('transactionCount', (parseInt(transactionCount) + 1).toString());
+
+        navigation.replace('QRCode', signature)
     }
 
     return (

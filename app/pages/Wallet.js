@@ -1,13 +1,13 @@
 import 'react-native-get-random-values';
 import 'fastestsmallesttextencoderdecoder';
-import { Text, View, TouchableOpacity } from "react-native";
+import { Text, View, TouchableOpacity, ActivityIndicator } from "react-native";
 import { setItemAsync, getItemAsync, deleteItemAsync } from "expo-secure-store";
 import { useEffect, useState } from "react";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { touchableOpacityStyles } from '../components/styles';
 import { goerli } from 'viem/chains';
 import IERC20 from "../data/IERC20.json";
-import { createPublicClient, createWalletClient, parseGwei, http, parseEther } from 'viem';
+import { createPublicClient, createWalletClient, parseGwei, http, parseEther, encodeFunctionData, pad } from 'viem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import "react-native-get-random-values"
 import "@ethersproject/shims"
@@ -16,23 +16,17 @@ import { BigNumber, utils } from 'ethers';
 
 export const Wallet = ({ navigation }) => {
 
-
+    const [loading, setLoading] = useState(false);
 
     const [address, setAddress] = useState(null);
     
     useEffect(() => {
         getItemAsync('address')
         .then((address) => address && setUp(address))
-
-        const inf = new utils.Interface(IERC20.abi);
-        
-        console.log(inf.encodeFunctionData('approve', [
-            "0xf3679DBeb5954a39a0a2dddb715A4409A4bD81ee",
-            BigNumber.from("10000000000000000")
-        ]))
     }, [])
 
     const setUp = async (address) => {
+
         setAddress(address)
 
         const client = createPublicClient({
@@ -40,57 +34,54 @@ export const Wallet = ({ navigation }) => {
             transport: http('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw')
         })
 
-        console.log(address)
+        const privKey = await getItemAsync('privateKey')
 
-        const transactionCount = await client.getTransactionCount({ address })
+        const transactionCount = await client.getTransactionCount({ address: privateKeyToAccount(privKey).address })
         
         await AsyncStorage.setItem('transactionCount', transactionCount.toString())
-        await deleteItemAsync('privateKey')
-        await deleteItemAsync('address')
-
-        console.log(transactionCount)
-
+    
+        console.log(address, transactionCount)
     }
 
     const create = async () => {
 
+        setLoading(true);
+
+        const inf = new utils.Interface(IERC20.abi);
+
         const privateKey = generatePrivateKey();
 
-        const account = privateKeyToAccount(privateKey);
-        
-        const account2 = privateKeyToAccount("0x9cc1f2b0c4790daf5844f7c2ae3ed6f6b0f8390570164e9e86e1a960685ed0a4")
+        const transport = http('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw')
 
-        const walletClient2 = createWalletClient({
-            account: account2,
+        const account = privateKeyToAccount(privateKey);
+
+        const feeder = privateKeyToAccount("0x9cc1f2b0c4790daf5844f7c2ae3ed6f6b0f8390570164e9e86e1a960685ed0a4")
+
+        const feedWallet = createWalletClient({
+            account: feeder,
             chain: goerli,
-            transport: http('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw')
+            transport
         })
 
-
-
-        const hash2 = await walletClient2.sendTransaction({
-            account: account2,
+        const fundingHash = await feedWallet.sendTransaction({
+            account: feeder,
             to: account.address,
             value: parseEther("0.01"),
         })
 
-
-
         const publicClient = createPublicClient({
             chain: goerli,
-            transport: http('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw')
+            transport
         })
 
-        const transaction = await publicClient.waitForTransactionReceipt( 
-            { hash: hash2 }
+        await publicClient.waitForTransactionReceipt( 
+            { hash: fundingHash }
         )
-        // alert(hash2)
-
 
         const walletClient = createWalletClient({
             account,
             chain: goerli,
-            transport: http('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw')
+            transport
         })
 
         const hash = await walletClient.sendTransaction({
@@ -102,42 +93,117 @@ export const Wallet = ({ navigation }) => {
             maxPriorityFeePerGas: parseGwei('2'), 
         })
 
+        console.log(hash)
 
-        const transaction2 = await publicClient.waitForTransactionReceipt(
-            { hash }
-        )
+        const tx = await publicClient.waitForTransactionReceipt({ hash })
+        
+        console.log(tx)
+        console.log(tx.logs[1].topics[0])
 
-        console.log(transaction2.logs[0].topics[0], "6")
-          
-        // setItemAsync('privateKey', privateKey);
-        // setItemAsync('address', account.address);
+        const data = inf.encodeFunctionData('approve', [
+            "0xf3679DBeb5954a39a0a2dddb715A4409A4bD81ee",
+            BigNumber.from((1000000).toString()).mul(BigNumber.from(10).pow(18))
+        ])
+
+        const executeABI = {
+            inputs: [
+                { 'type': 'address', 'name': 'to'},
+                { 'type': 'uint256', 'name': 'value'},
+                { 'type': 'bytes', 'name': 'data'},
+                { 'type': 'uint8', 'name': 'operation'},
+                { 'type': 'uint256', 'name': 'safeTxGas'},
+                { 'type': 'uint256', 'name': 'baseGas'},
+                { 'type': 'uint256', 'name': 'gasPrice'},
+                { 'type': 'address', 'name': 'gasToken'},
+                { 'type': 'address', 'name': 'refundReceiver'},
+                { 'type': 'bytes', 'name': 'signatures'}
+            ],
+            outputs: [
+                {'type': 'bool'}
+            ],
+            name: 'execTransaction',
+            type: 'function',
+            stateMutability: 'payable',
+        }
+        
+        const signatures = pad(account.address, { size: 32 }) + pad("1", { size: 32 }).replace("0x", "00")
+
+        const aaData = encodeFunctionData({
+            abi: [executeABI],
+            args: [
+                "0x8ACFC9D02FB13d83eE4Cfa9102d50f7abD0C3656",
+                parseEther("0"),
+                data,
+                0,
+                parseGwei("0"),
+                parseGwei("0"),
+                parseGwei("0"),
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+                signatures
+            ]
+        })
+
+        console.log(tx.logs[0].address)
+
+        await feedWallet.sendTransaction({
+            account: feeder,
+            to: tx.logs[0].address,
+            value: parseEther("0.01"),
+        })
+        
+        const approvalHash = await walletClient.sendTransaction({
+            account,
+            to: tx.logs[0].address,
+            data: aaData
+        })
+    
+        const approvalTx = await publicClient.waitForTransactionReceipt({ hash: approvalHash })
+    
+        console.log(approvalTx)
+        
+        setItemAsync('privateKey', privateKey);
+        setItemAsync('address', tx.logs[0].address);
+        
+        setUp(tx.logs[0].address)
+
+        setLoading(false);
+
     }
 
     return (
         <View style={{ flex: 1, alignItems: 'center', padding: 50}}>
             {
-                address ? 
+                loading ?
                 <View style={{ flex: 1, justifyContent: 'center'}}>
-                    <Text style={{fontSize: 25 }}>Your Account: {address?.substring(0, 6)}...{address?.substring(address?.length - 4, address?.length)}</Text>
-                </View> 
+                    <ActivityIndicator size="large" color="#000" />
+                </View>
                 :
                 <View>
-                    <View style={{ flex: 1, justifyContent: 'center'}}>
-                        <Text style={{fontSize: 25 }}>Welcome to Offline Wallet</Text>
-                    </View>  
-                    <TouchableOpacity
-                        style={[touchableOpacityStyles, {backgroundColor: "#000"}]}
-                        onPress={create}
-                    >
-                        <Text
-                            style={{fontSize: 20, color: "#fff"}}
-                        >
-                            Generate Private Key
-                        </Text>
-                    </TouchableOpacity> 
-                </View>   
+                    {
+                        address ? 
+                        <View style={{ flex: 1, justifyContent: 'center'}}>
+                            <Text style={{fontSize: 25 }}>Your Account: {address?.substring(0, 6)}...{address?.substring(address?.length - 4, address?.length)}</Text>
+                        </View> 
+                        :
+                        <View>
+                            <View style={{ flex: 1, justifyContent: 'center'}}>
+                                <Text style={{fontSize: 25 }}>Welcome to Offline Wallet</Text>
+                            </View>  
+                            <TouchableOpacity
+                                style={[touchableOpacityStyles, {backgroundColor: "#000"}]}
+                                onPress={create}
+                            >
+                                <Text
+                                    style={{fontSize: 20, color: "#fff"}}
+                                >
+                                    Generate Private Key
+                                </Text>
+                            </TouchableOpacity> 
+                        </View>   
+                    }
+                </View>
             }
-
         </View>  
     );
 }
