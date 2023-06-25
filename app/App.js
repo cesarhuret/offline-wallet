@@ -11,6 +11,7 @@ import { Sign } from './components/Sign';
 import { ScanPopup } from './pages/ScanPopup';
 import { Execute } from './pages/Execute';
 
+
 const av = new Animated.Value(0);
 av.addListener(() => {return});
 
@@ -46,7 +47,7 @@ const Tabs = ({ route }) => {
     >
       <Tab.Screen name="Scan" component={Scan} />
       <Tab.Screen name="Wallet" component={Wallet} />
-      <Tab.Screen name="Create Payment" component={Create} />
+      <Tab.Screen name="Create" component={Create} />
     </Tab.Navigator>
   );
 }

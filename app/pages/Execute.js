@@ -1,4 +1,4 @@
-import { Linking, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Text, View } from "react-native";
 import { useState } from "react";
 import { touchableOpacityStyles } from "../components/styles";
 import { TouchableOpacity } from "react-native";
@@ -7,8 +7,12 @@ import { providers } from "ethers";
 export const Execute = ({route, navigation}) => {
 
     const [hash, setHash] = useState();
+    
+    const [loading, setLoading] = useState(false);
 
     const execute = async () => {
+
+        setLoading(true);
 
         const provider = new providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/75qiyn1_EpxCn93X5tD7yEtmcXUM_Udw');
 
@@ -17,10 +21,19 @@ export const Execute = ({route, navigation}) => {
         const response = await sentTx.wait();
 
         setHash(response.transactionHash);
+
+        setLoading(false);
     }
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', padding: 50}}>
+            {
+            loading ?
+            <View style={{ flex: 1, justifyContent: 'center'}}>
+                <ActivityIndicator size="large" color="#000" />
+            </View>
+            :
+            <View>
             {
                 hash ? 
                 <View>
@@ -60,7 +73,8 @@ export const Execute = ({route, navigation}) => {
                     </View>
                 </View>
             }
-
+            </View>
+        }
         </View>
     );
 
